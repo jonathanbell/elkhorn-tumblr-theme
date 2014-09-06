@@ -1,0 +1,352 @@
+<html class="no-js">
+<!-- no !DOCTYPE as Tumblr seems to put in it's own <!DOCTYPE html> in the output. Neat. -->
+
+<head>
+
+  <meta charset="UTF-8">
+
+  {block:Description}
+    <meta name="description" content="{MetaDescription}" />
+  {/block:Description}
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <!-- Tumblr sends the X-UA-Compatible:IE=Edge,chrome=1 header :) -->
+
+  <title>{Title}{block:PostTitle} // {PostTitle}{/block:PostTitle}</title>
+
+  <link rel="alternate" type="application/rss+xml" href="{RSS}" />
+
+  <!-- photoswipe.css -->
+  <link rel="stylesheet" href="http://static.tumblr.com/uoxxoej/Jv4nbhhiu/photoswipe.css">
+  <!-- klass.js required by photoswipe -->
+  <script src="http://static.tumblr.com/uoxxoej/A4Unbhhsg/klass.min.js"></script>
+  <!-- jQuery -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+  <!-- PhotoSwipe -->
+  <script src="http://static.tumblr.com/uoxxoej/B63nbhhv1/code.photoswipe.jquery-3.0.5.min.js"></script>
+
+  <!--
+    There are no JS fallbacks or shims here and I do not support < IE10.
+    #sobadass
+  -->
+
+  <style>
+
+    *, *:before, *:after {
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+      box-sizing: border-box;
+      list-style: none;
+    }
+
+    /* override photoswipe css and make a "safe" area */
+    body.ps-active header,
+    body.ps-active header *,
+    body.ps-active iframe {
+      display: block;
+    }
+
+    div.ps-uilayer {
+      cursor: ew-resize;
+    }
+
+    body {
+      background: black;
+      {block:PermalinkPage}background: white;{/block:PermalinkPage}
+      font-family: sans-serif !important;
+      margin: 0;
+      padding: 0;
+    }
+
+    a, a:hover {
+      text-decoration: none;
+      color: white;
+      {block:PermalinkPage}color: black;{/block:PermalinkPage}
+    }
+    {block:PermalinkPage}
+      a:hover {
+        text-decoration: underline;
+      }
+    {/block:PermalinkPage}
+
+    h1 {
+      position: absolute;
+      top: 47px;
+      left: 0px;
+      width: 715px;
+      height: 97px;
+      z-index: 333;
+      color: white;
+      background: black;
+      padding: 1px;
+      padding-left: 5px;
+      font-size: 83px;
+      text-transform: uppercase !important;
+      cursor: auto;
+    }
+
+    .theme-link, .counter, .permalink {
+      position: absolute;
+      color: white;
+      z-index: 333;
+      display: block !important;
+      font-size: 66.666%;
+      padding: 1px;
+    }
+
+    .theme-link, .permalink {
+      font-weight: bold;
+      top: 0;
+      background: transparent; /* 0.7 */
+      font-weight: bold;
+      opacity: 0.7;
+    }
+
+    .theme-link {
+      top: 0;
+      left: 204px;
+    }
+
+    .counter {
+      background: black;
+      opacity: 0.8;
+    }
+
+    .permalink {
+      left: 111px;
+      width: 87px;
+      height: 14px;
+      padding: 1px 3px 0 3px;
+    }
+      .permalink:hover {
+        opacity: 1;
+        background: red;
+      }
+
+    /* permalink pages */
+    .action {
+      padding-left: 5px;
+    }
+    .note {
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+      .note .avatar {
+        margin-top: 3px;
+      }
+
+  </style>
+
+  <!-- add custom css in the admin area of your theme -->
+  <style>
+    {CustomCSS}
+  </style>
+
+</head>
+
+<body{block:PermalinkPage} class="not-front"{/block:PermalinkPage}>
+
+  {block:IndexPage}
+    <div class="counter"></div>
+    <a class="permalink" target="_blank" href="#">&lt;link to photo&gt;</a>
+    <a class="theme-link" target="_blank" href="https://github.com/jonathanbell/credittocreation-tumblr-theme">&lt;theme&gt;</a>
+    <header class="header">
+      <h1 id="toggle"><a href="http://jonathanbell.ca" target="_blank">{Title}</a></h1>
+    </header>
+  {/block:IndexPage}
+
+  <div {block:IndexPage}style="opacity:0" {/block:IndexPage}id="main" role="main">
+
+    <!-- yep, the theme only photo posts. see the docs. -->
+    {block:Posts}
+      {block:Photo}
+        <article id="post-{PostID}" class="post photo {TagsAsClasses}">
+          {block:IndexPage}<a href="{Permalink}">{/block:IndexPage}<img src="{PhotoURL-HighRes}" alt="{PhotoAlt}">{block:IndexPage}</a>{/block:IndexPage}
+        </article>
+      {/block:Photo}
+    {/block:Posts}
+
+    <!-- on single page -->
+    {block:PermalinkPage}
+      {block:PostNotes}
+        <section id="notes">{PostNotes}</section>
+      {/block:PostNotes}
+    {/block:PermalinkPage}
+
+  </div><!-- /role="main" -->
+
+  <script>
+
+    {block:IndexPage}
+
+    /*
+    * Hookup PhotoSwipe.js to Tumblr and load new photos (only) dynamically.
+    * https://github.com/dimsemenov/PhotoSwipe
+    */
+
+    // URL components
+    // https://gist.github.com/jlong/2428561
+    /*
+    * Did we start on the homepage of the blog?
+    * Let's determine we are not starting on some other page other than page/1
+    * and set a var to hold the current page and pagination position.
+     */
+    var
+      URLparser = document.createElement('a'),
+      pageID; // the page position
+    URLparser.href = document.URL;
+    var URLparsed = URLparser.pathname.split('/');
+
+    if (URLparsed[1] && URLparsed[2] && !isNaN(URLparsed[2]) && URLparsed[1] == 'page') {
+      pageID = URLparsed[2];
+    } else {
+      pageID = 1; // on the 'homepage'
+    }
+
+    // config options for PhotoSwipe
+    // global just for fun.
+    // https://github.com/dimsemenov/PhotoSwipe#options
+    var PSoptions = {
+      preventHide: true,
+      allowUserZoom: false,
+      captionAndToolbarShowEmptyCaptions: false,
+      preventSlideshow: true,
+      zIndex: '101',
+      backButtonHideEnabled: false,
+      enableDrag: true, // hmmmm....
+      imageScaleMethod: 'zoom',
+      enableKeyboard: true,
+      captionAndToolbarAutoHideDelay: 3345,
+      getImageSource: function (obj) {
+        return obj.url;
+      },
+      getImageCaption: function (obj) {
+        return obj.caption;
+      }
+      // ,getToolbar: function(obj) {
+      //   return '<p>A test toolbar getToolbar event.</p>';
+      // }
+    };
+
+    // initialize PhotoSwipe on page load
+    document.addEventListener('DOMContentLoaded', function () {
+
+      // check that we are not on a Tumblr '404' page.
+      // sadly, tumblr does not return a 404 header on a page like /page/999999
+      // so, we check if we have content in #main.
+      // no point in doing much at all if we don't have any content to show. :)
+      // we're also checking that we are NOT on a permalink page
+      if ($('#main').children().length > 2) {
+
+        console.log('We have content in #main. Starting to append PhotoSwipe.');
+
+        // an array to hold the initial photos
+        var initialPhotoz = [];
+        // load the temp array with the photos on page load
+        $('.post.photo').each(function() {
+          initialPhotoz.push({url: $(this).children('a').children('img').first().attr('src'), caption: '',  permalink: $(this).children('a').first().attr('href')});
+        });
+
+        // create the first PhotoSwipe instance and load it with initial photos
+        var instance = window.Code.PhotoSwipe.attach(initialPhotoz, PSoptions);
+        // draw the instance :)
+        instance.show(0);
+
+        // setup a listener to listen for gallery changes
+        // and fetch more photos when we get close to the end of the length
+        window.Code.PhotoSwipe.instances[0].addEventHandler(window.Code.PhotoSwipe.EventTypes.onDisplayImage, function(e) {
+
+            console.log('index is ' + ((e.index) + 0) + '. cache length is ' + window.Code.PhotoSwipe.instances[0].cache.images.length + '.');
+
+            // update the counter
+            $('.counter').html(((e.index)+1) + '/' + window.Code.PhotoSwipe.instances[0].cache.images.length + ' (use &#8592;/&#8594; keys)');
+            // reposition the .permalink
+            if (window.Code.PhotoSwipe.instances[0].cache.images.length > 99) {
+              $('.permalink').css('left', '124px').css('height', '16px');
+              $('.theme-link').css('left', '214px').css('height', '16px');
+            }
+
+            // update the permalink
+            $('.permalink').attr('href', window.Code.PhotoSwipe.instances[0].getCurrentImage().refObj.permalink);
+            console.log('Post permalink is ' + window.Code.PhotoSwipe.instances[0].getCurrentImage().refObj.permalink);
+
+            // check if we are near the end of the photos currently loaded into
+            // the cache. if we are, get more photos from the next Tumblr page.
+            if (((e.index) + 4) >= window.Code.PhotoSwipe.instances[0].cache.images.length) {
+
+              console.log('cache updating....');
+
+              // add 1 to our current page
+              pageID++;
+              console.log('pageID is now ' + pageID + '.');
+
+              // fire off an ajax request to the page in order to get new content
+              $.ajax({
+                url: 'page/' + pageID,
+                dataType: 'html', // defaults 'intelegent guess' http://api.jquery.com/jquery.ajax/
+
+                beforeSend: function() {
+                  // add some "loading" text to the counter
+                  $('.counter').html(((e.index)+1) + '/' + window.Code.PhotoSwipe.instances[0].cache.images.length + ' Loading...');
+                },
+
+                success: function(data) {
+
+                  console.log('getting new data from page ' + pageID + '.');
+
+                  // for each of the returned photos, append to the
+                  // current instance of PhotoSwipe.
+                  $.each($(data).find('.post.photo'), function() {
+
+                    var photoSrc = $(this).children('a').children('img').first().attr('src');
+                    var postPermalink = $(this).children('a').first().attr('href');
+
+                    // https://github.com/dimsemenov/PhotoSwipe/issues/243
+                    window.Code.PhotoSwipe.instances[0].cache.images.push(new window.Code.PhotoSwipe.Image.ImageClass({ url: photoSrc, caption: '', permalink: postPermalink}, window.Code.PhotoSwipe.instances[0].settings.getImageSource({url: photoSrc, caption: '', permalink: postPermalink }), window.Code.PhotoSwipe.instances[0].settings.getImageCaption({url: photoSrc, caption: '', permalink: postPermalink}), window.Code.PhotoSwipe.instances[0].settings.getImageMetaData({ url: photoSrc, caption: '', permalink: postPermalink })));
+
+                    console.log('ajax returned successfully. photoswipe cache updated');
+
+                    // remove the spinner for the counter area
+                    $('.counter').html(((e.index)+1) + '/' + window.Code.PhotoSwipe.instances[0].cache.images.length + ' (use &#8592;/&#8594; keys)');
+
+                  }); // for each photo returned from ajax
+
+                }, // ajax success
+
+                error: function() {
+                  console.log('Something went wrong with AJAX bro.');
+                } // ajax error
+
+              }); // ajax request
+
+            } // END if array index is nearing size of PhotoSwipe cache
+
+        }); // onDisplayImage listner
+
+        // setup two event listeners for when the captions and/or toolbar show
+        // and hide. this will allow the showing and hiding of the main blog
+        // title aswell.
+        window.Code.PhotoSwipe.instances[0].addEventHandler(window.Code.PhotoSwipe.EventTypes.onBeforeCaptionAndToolbarHide, function(e) {
+
+          console.log('Toolbar going to hide now..');
+          $('#toggle').fadeOut(PSoptions.fadeOutSpeed);
+
+        }); // onBeforeCaptionAndToolbarHide
+
+        window.Code.PhotoSwipe.instances[0].addEventHandler(window.Code.PhotoSwipe.EventTypes.onCaptionAndToolbarShow, function(e) {
+
+          console.log('Toolbar shown!');
+          $('#toggle').show();
+
+        }); // onCaptionAndToolbarShow
+
+      } // if #main is not empty and we are on a page like /page
+
+    }, false); // on page load
+
+    {/block:IndexPage} // we were on an IndexPage, so we rendered the gallery
+
+  </script><!-- oh, isn't JavaScript just great! -->
+
+</body>
+
+</html>
