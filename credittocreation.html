@@ -11,6 +11,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <!-- Tumblr sends the X-UA-Compatible:IE=Edge,chrome=1 header :) -->
 
+  <meta name="if:Fullscreen photos" content="0"/>
+
   <title>{Title}{block:PostTitle} // {PostTitle}{/block:PostTitle}</title>
 
   <link rel="alternate" type="application/rss+xml" href="{RSS}" />
@@ -213,7 +215,7 @@
       zIndex: '101',
       backButtonHideEnabled: false,
       enableDrag: true, // hmmmm....
-      imageScaleMethod: 'zoom',
+      imageScaleMethod: {block:IfNotFullscreenPhotos}'fit',{/block:IfNotFullscreenPhotos}{block:IfFullscreenPhotos}'zoom',{/block:IfFullscreenPhotos} // zoom
       enableKeyboard: true,
       captionAndToolbarAutoHideDelay: 3345,
       getImageSource: function (obj) {
