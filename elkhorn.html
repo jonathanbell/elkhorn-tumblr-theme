@@ -1,21 +1,23 @@
 <html class="no-js">
-<!-- no !DOCTYPE as Tumblr seems to put in it's own <!DOCTYPE html> in the output. Neat. -->
-
 <head>
-
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
   {block:Description}
     <meta name="description" content="{MetaDescription}" />
   {/block:Description}
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-  <!-- Tumblr sends the X-UA-Compatible:IE=Edge,chrome=1 header :) -->
 
-  <meta name="if:Fullscreen photos" content="0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 
   <title>{Title}{block:PostTitle} // {PostTitle}{/block:PostTitle}</title>
 
+  <link rel="shortcut icon" href="{Favicon}">
   <link rel="alternate" type="application/rss+xml" href="{RSS}" />
+
+  <meta name="if:Fullscreen Photos" content="1"/>
+  <meta name="if:Show Title" content="1"/>
+  <meta name="if:Fade Title Out" content="0"/>
 
   <!-- photoswipe.css (modified) -->
   <link rel="stylesheet" href="http://static.tumblr.com/uoxxoej/FEJnbhumd/photoswipe.css">
@@ -25,11 +27,6 @@
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
   <!-- PhotoSwipe -->
   <script src="http://static.tumblr.com/uoxxoej/B63nbhhv1/code.photoswipe.jquery-3.0.5.min.js"></script>
-
-  <!--
-    There are no JS fallbacks or shims here and I do not support < IE10.
-    #sobadass
-  -->
 
   <style>
 
@@ -43,9 +40,16 @@
     /* override photoswipe css and make a "safe" area */
     body.ps-active header,
     body.ps-active header *,
-    body.ps-active iframe {
+    body.ps-active iframe { display: block; }
+    body.ps-active #safe-area, div.ps-active #safe-area {
       display: block;
+      z-index: 333;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 33.333%;
     }
+    body.ps-active #safe-area * { display: inline-block; color: white; }
 
     div.ps-uilayer {
       cursor: ew-resize;
@@ -53,93 +57,51 @@
 
     body {
       background: black;
-      {block:PermalinkPage}background: white;{/block:PermalinkPage}
       font-family: sans-serif !important;
       margin: 0;
       padding: 0;
     }
+    body.not-front { overflow: hidden; }
 
     a, a:hover {
       text-decoration: none;
       color: white;
-      {block:PermalinkPage}color: black;{/block:PermalinkPage}
     }
-    {block:PermalinkPage}
-      a:hover {
-        text-decoration: underline;
-      }
-    {/block:PermalinkPage}
+    .not-front a, .not-front a:hover { color:black; }
 
     h1 {
-      position: absolute;
-      top: 47px;
-      left: 0px;
-      width: 715px;
-      height: 97px;
-      z-index: 333;
-      color: white;
       background: black;
-      padding: 1px;
-      padding-left: 5px;
-      font-size: 83px;
-      text-transform: uppercase !important;
-      cursor: auto;
+      padding: 3px;
+      font-size: 3.333rem;
+      text-transform: uppercase;
     }
 
     .theme-link, .counter, .permalink {
-      position: absolute;
-      color: white;
-      z-index: 333;
-      display: block !important;
       font-size: 66.666%;
-      padding: 1px;
-    }
-
-    .theme-link, .permalink {
-      font-weight: bold;
-      top: 0;
-      background: transparent; /* 0.7 */
       font-weight: bold;
       opacity: 0.7;
-    }
-
-    .theme-link {
-      top: 0;
-      left: 204px;
-    }
-
-    .counter {
-      background: black;
-      opacity: 0.8;
-    }
-
-    .permalink {
-      left: 111px;
-      width: 87px;
-      height: 14px;
       padding: 1px 3px 0 3px;
     }
-      .permalink:hover {
-        opacity: 1;
-        background: red;
-      }
+    .permalink:hover, .theme-link:hover { opacity: 1; background: red; }
 
-    /* permalink pages */
-    .action {
-      padding-left: 5px;
+    .counter { padding: 0; opacity: 0.8; margin-right: 1rem; }
+
+    #the-photo {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
     }
-    .note {
-      font-size: 12px;
-      text-transform: uppercase;
-    }
-      .note .avatar {
-        margin-top: 3px;
-      }
 
-  </style>
+    .like_and_reblog_buttons { list-style: none; display: block; }
+    .like_and_reblog_buttons li { display: inline-block; float: left; margin-right: 3px; }
 
-  <!-- add custom css in the admin area of your theme -->
-  <style>
+    #notes { clear: both; margin-top: 3rem; font-style: italic; font-size: 0.75rem; }
+    .avatar_frame { display: none; }
+    .not-front .note a { color: gray; } .not-front .note a:hover { color: #ccc; }
+
     {CustomCSS}
   </style>
 
@@ -148,31 +110,43 @@
 <body{block:PermalinkPage} class="not-front"{/block:PermalinkPage}>
 
   {block:IndexPage}
-    <div class="counter"></div>
-    <a class="permalink" target="_blank" href="#">&lt;link to photo&gt;</a>
-    <a class="theme-link" target="_blank" href="https://github.com/jonathanbell/credittocreation-tumblr-theme">&lt;theme&gt;</a>
-    <header class="header">
-      <h1 id="toggle"><a href="http://jonathanbell.ca" target="_blank">{Title}</a></h1>
-    </header>
+    <div id="safe-area">
+      <div class="counter"></div>
+      <nav>
+        <a class="permalink" href="#">&lt;link to photo&gt;</a>
+        <a class="theme-link" target="_blank" href="https://github.com/jonathanbell/elkhorn-tumblr-theme">&lt;theme&gt;</a>
+      </nav>
+      <header class="header">
+        {block:IfShowTitle}<h1 id="toggle"><a href="/">{Title}</a></h1>{/block:IfShowTitle}
+        {block:Description}<p style="font-size: 1rem;">{MetaDescription}</p>{/block:Description}
+      </header>
+    </div>
+    <div style="opacity:0" id="main" role="main">
   {/block:IndexPage}
-
-  <div {block:IndexPage}style="opacity:0" {/block:IndexPage}id="main" role="main">
 
     <!-- yep, the theme only photo posts. see the docs. -->
     {block:Posts}
       {block:Photo}
-        <article id="post-{PostID}" class="post photo {TagsAsClasses}">
-          {block:IndexPage}<a href="{Permalink}">{/block:IndexPage}<img src="{PhotoURL-HighRes}" alt="{PhotoAlt}">{block:IndexPage}</a>{/block:IndexPage}
-        </article>
+
+        {block:IndexPage}
+          <article id="post-{PostID}" class="post photo {TagsAsClasses}">
+            {block:IndexPage}<a href="{Permalink}">{/block:IndexPage}<img src="{PhotoURL-HighRes}" alt="{PhotoAlt}">{block:IndexPage}</a>{/block:IndexPage}
+          </article>
+        {/block:IndexPage}
+
+        {block:PermalinkPage}
+          <div id="the-photo" style="background-image: url('{PhotoURL-HighRes}') ;-webkit-background-size: cover; -moz-background-size: cover; -o-background-size: cover; background-size: cover;">
+            <ul class="like_and_reblog_buttons">
+              <li>{LikeButton color="white"}</li>
+              <li>{ReblogButton color="white"}</li>
+              <li><a style="color: white;" href="/">back</a></li>
+            </ul>
+            {block:PostNotes}<section id="notes">{PostNotes}</section>{/block:PostNotes}
+          </div>
+        {/block:PermalinkPage}
+
       {/block:Photo}
     {/block:Posts}
-
-    <!-- on single page -->
-    {block:PermalinkPage}
-      {block:PostNotes}
-        <section id="notes">{PostNotes}</section>
-      {/block:PostNotes}
-    {/block:PermalinkPage}
 
   </div><!-- /role="main" -->
 
@@ -205,7 +179,6 @@
     }
 
     // config options for PhotoSwipe
-    // global just for fun.
     // https://github.com/dimsemenov/PhotoSwipe#options
     var PSoptions = {
       preventHide: true,
@@ -214,8 +187,8 @@
       preventSlideshow: true,
       zIndex: '101',
       backButtonHideEnabled: false,
-      enableDrag: true, // hmmmm....
-      imageScaleMethod: {block:IfNotFullscreenPhotos}'fit',{/block:IfNotFullscreenPhotos}{block:IfFullscreenPhotos}'zoom',{/block:IfFullscreenPhotos} // zoom
+      enableDrag: true,
+      imageScaleMethod: {block:IfFullscreenPhotos}'zoom'{block:IfFullscreenPhotos}{block:IfNotFullscreenPhotos}'fit'{block:IfNotFullscreenPhotos},
       enableKeyboard: true,
       captionAndToolbarAutoHideDelay: 3345,
       getImageSource: function (obj) {
@@ -224,16 +197,13 @@
       getImageCaption: function (obj) {
         return obj.caption;
       }
-      // ,getToolbar: function(obj) {
-      //   return '<p>A test toolbar getToolbar event.</p>';
-      // }
     };
 
     // initialize PhotoSwipe on page load
     document.addEventListener('DOMContentLoaded', function () {
 
       // check that we are not on a Tumblr '404' page.
-      // sadly, tumblr does not return a 404 header on a page like /page/999999
+      // sadly, tumblr does not return a 404 header on a page like /page/9999999
       // so, we check if we have content in #main.
       // no point in doing much at all if we don't have any content to show. :)
       // we're also checking that we are NOT on a permalink page
@@ -275,12 +245,6 @@
             // the cache. if we are, get more photos from the next Tumblr page.
             if (((e.index) + 4) >= window.Code.PhotoSwipe.instances[0].cache.images.length) {
 
-              console.log('cache updating....');
-
-              // add 1 to our current page
-              pageID++;
-              console.log('pageID is now ' + pageID + '.');
-
               // fire off an ajax request to the page in order to get new content
               $.ajax({
                 url: 'page/' + pageID,
@@ -292,6 +256,10 @@
                 },
 
                 success: function(data) {
+
+                  // add 1 to our current page
+                  pageID++;
+                  console.log('pageID is now ' + pageID + '.');
 
                   console.log('getting new data from page ' + pageID + '.');
 
@@ -314,8 +282,14 @@
 
                 }, // ajax success
 
-                error: function() {
-                  console.log('Something went wrong with AJAX bro.');
+                error: function(xhr, ajaxOptions, thrownError) {
+                  if(xhr.status==404) {
+                    console.log('Something went wrong with AJAX bro. It said: ' + thrownError + '. We are probably out of pages to query on. If that is the case, it\'s OK. :) ');
+                  } else {
+                    console.log('Something went wrong with AJAX bro.');
+                  }
+                  // remove the spinner for the counter area
+                  $('.counter').html(((e.index)+1) + '/' + window.Code.PhotoSwipe.instances[0].cache.images.length + ' (use &#8592;/&#8594; keys)');
                 } // ajax error
 
               }); // ajax request
@@ -324,6 +298,7 @@
 
         }); // onDisplayImage listner
 
+        {block:IfFadeTitleOut}
         // setup two event listeners for when the captions and/or toolbar show
         // and hide. this will allow the showing and hiding of the main blog
         // title aswell.
@@ -340,12 +315,17 @@
           $('#toggle').show();
 
         }); // onCaptionAndToolbarShow
+        {/block:IfFadeTitleOut}
 
       } // if #main is not empty and we are on a page like /page
 
     }, false); // on page load
 
-    {/block:IndexPage} // we were on an IndexPage, so we rendered the gallery
+    // we are on an IndexPage, so we rendered the gallery
+    {/block:IndexPage}
+
+    // this is an annoying element Tumblr places in, even tho we didn't declare it in our theme
+    {block:PermalinkPage}$('body > a img').first().remove();{/block:PermalinkPage}
 
   </script><!-- oh, isn't JavaScript just great! -->
 
