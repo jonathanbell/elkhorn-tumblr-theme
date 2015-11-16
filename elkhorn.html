@@ -231,11 +231,6 @@
 
             // update the counter
             $('.counter').html(((e.index)+1) + '/' + window.Code.PhotoSwipe.instances[0].cache.images.length + ' (use &#8592;/&#8594; keys)');
-            // reposition the .permalink
-            if (window.Code.PhotoSwipe.instances[0].cache.images.length > 99) {
-              $('.permalink').css('left', '124px').css('height', '16px');
-              $('.theme-link').css('left', '214px').css('height', '16px');
-            }
 
             // update the permalink
             $('.permalink').attr('href', window.Code.PhotoSwipe.instances[0].getCurrentImage().refObj.permalink);
@@ -244,6 +239,10 @@
             // check if we are near the end of the photos currently loaded into
             // the cache. if we are, get more photos from the next Tumblr page.
             if (((e.index) + 4) >= window.Code.PhotoSwipe.instances[0].cache.images.length) {
+
+              // add 1 to our current page
+              pageID++;
+              console.log('pageID is now ' + pageID + '.');
 
               // fire off an ajax request to the page in order to get new content
               $.ajax({
@@ -256,10 +255,6 @@
                 },
 
                 success: function(data) {
-
-                  // add 1 to our current page
-                  pageID++;
-                  console.log('pageID is now ' + pageID + '.');
 
                   console.log('getting new data from page ' + pageID + '.');
 
@@ -288,6 +283,10 @@
                   } else {
                     console.log('Something went wrong with AJAX bro.');
                   }
+
+                  pageID--;
+                  console.log('pageID is now ' + pageID + '.');
+
                   // remove the spinner for the counter area
                   $('.counter').html(((e.index)+1) + '/' + window.Code.PhotoSwipe.instances[0].cache.images.length + ' (use &#8592;/&#8594; keys)');
                 } // ajax error
