@@ -7,7 +7,7 @@ This theme aims to provide photographers or artists with a visually impacting bl
 
 ## And displayed they shall be!
 
-Elkhorn displays photos FULL SCREEN. I suggest just installing this theme to see if you like it. :)
+Elkhorn displays photos FULL SCREEN, cropped/zoomed so that the fit edge to edge inside the browser (although, there is an option to turn this effect off). [Checkout the demo blog](http://elkhorn-theme.tumblr.com/) to get a sense of what this means. The effect is all, "POW! Right in the kisser!"
 
 ## To Install this Theme
 
