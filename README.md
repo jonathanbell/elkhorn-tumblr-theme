@@ -16,5 +16,5 @@ Elkhorn displays photos FULL SCREEN. I suggest just installing this theme to see
 3. Now in the customize area of your blog, click "Edit HTML" and delete **ALL** of the existing code.
 4. Paste in all of Elkhorn's source code that you copied from Step 1.
 5. Click "Update Preview" and then "Save".
-6. (optional) Elkhorn's theme options can be configured via the switches below the "Edit HTML" section.  
+6. (optional) Elkhorn's theme options can be configured. Click the back arrow (absolute top left) and configure the theme via the switches below the "Edit HTML" section.  
 7. Click "Exit". That's it! You're done!
