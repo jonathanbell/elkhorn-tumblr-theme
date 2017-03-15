@@ -19,4 +19,4 @@ Elkhorn displays photos FULL SCREEN, cropped/zoomed so that the images fit edge 
 6. (optional) Elkhorn's theme options can be configured. Click the back arrow (absolute top left) and configure the theme via the switches below the "Edit HTML" section.  
 7. Click "Exit". That's it! You're done!
 
-BTW, you can use the arrow keys (left + right) in order to scroll.
+BTW, you can use the left and right arrow keys on your keyboard to navigate.
